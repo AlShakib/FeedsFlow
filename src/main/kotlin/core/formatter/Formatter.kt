@@ -2,6 +2,7 @@ package core.formatter
 
 import extension.chomp
 import extension.format
+import org.jsoup.Jsoup
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -11,13 +12,13 @@ abstract class Formatter<ITEM> {
 
     fun format(format: String, item: ITEM): String {
         val pairList = onFormatterPairList(item)
-        val size = pairList.size
         val searchList = ArrayList<String>()
-        val replacementList = ArrayList<String>(size)
-        for (i in 0 until size) {
-            val pair = pairList[i]
-            searchList[i] = pair.first
-            replacementList[i] = pair.second
+        val replacementList = ArrayList<String>()
+        pairList.forEach { pair ->
+            run {
+                searchList.add(pair.first)
+                replacementList.add(pair.second)
+            }
         }
         return replaceEach(format, searchList, replacementList).chomp()
     }
@@ -29,7 +30,7 @@ abstract class Formatter<ITEM> {
         if (value is ZonedDateTime) {
             return value.format()
         }
-        return value.toString()
+        return Jsoup.parse(value.toString()).text()
     }
 
     private fun replaceEach(text: String, searchList: List<String>, replacementList: List<String>): String {
