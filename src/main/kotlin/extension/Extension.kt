@@ -1,34 +1,28 @@
 package extension
 
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
+
+private val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, hh:mm a").withZone(ZoneOffset.UTC)
 
 fun ZonedDateTime.toDate(): Date {
     return Date.from(this.toInstant())
 }
 
-/**
- * <p>Removes one newline from end of a String if it's there,
- * otherwise leave it alone.  A newline is &quot;{@code \n}&quot;,
- * &quot;{@code \r}&quot;, or &quot;{@code \r\n}&quot;.</p>
- *
- *
- * <pre>
- * StringUtils.chomp(null)          = null
- * StringUtils.chomp("")            = ""
- * StringUtils.chomp("abc \r")      = "abc "
- * StringUtils.chomp("abc\n")       = "abc"
- * StringUtils.chomp("abc\r\n")     = "abc"
- * StringUtils.chomp("abc\r\n\r\n") = "abc\r\n"
- * StringUtils.chomp("abc\n\r")     = "abc\n"
- * StringUtils.chomp("abc\n\rabc")  = "abc\n\rabc"
- * StringUtils.chomp("\r")          = ""
- * StringUtils.chomp("\n")          = ""
- * StringUtils.chomp("\r\n")        = ""
- * </pre>
- *
- * @return String without newline, {@code null} if null String input
- */
+fun ZonedDateTime.format(): String {
+    return this.format(dateTimeFormatter)
+}
+
+fun Int.toPlurals(singular: String, plural: String): String {
+    return if (this == 1) {
+        singular
+    } else {
+        plural
+    }
+}
+
 fun String.chomp(): String {
     if (isEmpty()) {
         return this;

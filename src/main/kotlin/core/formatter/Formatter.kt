@@ -1,6 +1,7 @@
 package core.formatter
 
 import extension.chomp
+import extension.format
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -26,7 +27,7 @@ abstract class Formatter<ITEM> {
             return ""
         }
         if (value is ZonedDateTime) {
-            return value.format(dateTimeFormatter)
+            return value.format()
         }
         return value.toString()
     }

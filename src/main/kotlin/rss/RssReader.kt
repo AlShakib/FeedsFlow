@@ -362,7 +362,7 @@ object RssReader {
                     rssItem!!.description = text
                 }
                 "link" -> {
-                    if (rssItem!!.id == null) {
+                    if (rssItem!!.id.isBlank()) {
                         rssItem.id = text
                     }
                     rssItem.url = text
