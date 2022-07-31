@@ -2,7 +2,7 @@ package core.model
 
 import java.util.*
 
-data class SentItem(val url: String = "", val title: String = "", val sentDate: Date = Date()) : Comparable<SentItem> {
+data class SentItem(val sentDate: Date = Date(), val url: String = "<Unknown URL>", val title: String = "<Unknown Title>") : Comparable<SentItem> {
 
     override fun compareTo(other: SentItem): Int {
         return sentDate.compareTo(other.sentDate)

@@ -1,21 +1,16 @@
 package extension
 
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import java.net.URI
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-private val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, hh:mm a").withZone(ZoneOffset.UTC)
+private val simpleDateFormat = SimpleDateFormat("dd MMMM yyyy, hh:mm a", Locale.getDefault())
 private val patternToWrapOn = Pattern.compile(" ")
 
-fun ZonedDateTime.toDate(): Date {
-    return Date.from(this.toInstant())
-}
-
-fun ZonedDateTime.format(): String {
-    return this.format(dateTimeFormatter)
+fun Date.format(): String {
+    return simpleDateFormat.format(this)
 }
 
 fun Int.toPlurals(singular: String, plural: String): String {
@@ -24,6 +19,10 @@ fun Int.toPlurals(singular: String, plural: String): String {
     } else {
         plural
     }
+}
+
+fun String.toURI(): URI {
+    return URI.create(this)
 }
 
 fun String.chomp(): String {

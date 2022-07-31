@@ -1,12 +1,11 @@
 package core.model
 
-import extension.format
-import java.time.ZonedDateTime
+import java.util.*
 
-data class Feed(val url: String = "", val title: String = "", val type: String = Type.NONE.toString(), val format: String = "",
-                val parseMode: String = ParseMode.NONE.toString(), val disableWebPagePreview: Boolean = false,
-                val disableNotification: Boolean = false, val protectContent: Boolean = false,
-                val active: Boolean = false, val sentItems: ArrayList<SentItem> = ArrayList()) : Comparable<Feed> {
+data class Feed(var url: String = "", var title: String = "", var type: String = Type.NONE.toString(), var format: String = "",
+                var parseMode: String = ParseMode.NONE.toString(), var disableWebPagePreview: Boolean = false,
+                var disableNotification: Boolean = false, var protectContent: Boolean = false,
+                var active: Boolean = false, var sentItems: ArrayList<SentItem> = ArrayList()) : Comparable<Feed> {
 
     override fun compareTo(other: Feed): Int {
         return if (title.isEmpty() || other.title.isEmpty()) {
@@ -35,43 +34,14 @@ data class Feed(val url: String = "", val title: String = "", val type: String =
         }
     }
 
-    open class Item : Comparable<Item> {
-        val parseDateTime: ZonedDateTime = ZonedDateTime.now()
-        var id: String = ""
-        var title: String = ""
-        var url: String = ""
-        var feed: Feed = Feed()
+    data class Item(val parseDate: Date, val feed: Feed, val id: String, val url: String, val title: String, val formattedText: String,
+                    val publishedDate: Date?) : Comparable<Item> {
 
         override fun compareTo(other: Item): Int {
-            return other.parseDateTime.compareTo(parseDateTime)
-        }
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as Item
-
-            if (parseDateTime != other.parseDateTime) return false
-            if (id != other.id) return false
-            if (title != other.title) return false
-            if (url != other.url) return false
-            if (feed != other.feed) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = parseDateTime.hashCode()
-            result = 31 * result + id.hashCode()
-            result = 31 * result + title.hashCode()
-            result = 31 * result + url.hashCode()
-            result = 31 * result + feed.hashCode()
-            return result
-        }
-
-        override fun toString(): String {
-            return "Item(parseDateTime=${parseDateTime.format()}, id='$id', title='$title', url='$url', feed=$feed)"
+            if (publishedDate == null || other.publishedDate == null) {
+                return -1
+            }
+            return publishedDate.compareTo(other.publishedDate)
         }
     }
 }

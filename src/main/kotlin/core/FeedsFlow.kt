@@ -5,14 +5,12 @@ import core.firebase.FirebaseManager
 import core.model.Chat
 import core.model.Feed
 import core.model.SentItem
+import core.reader.FormatToken
+import core.reader.rss.RssReader
 import core.telegram.TelegramBot
 import core.telegram.method.SendMessage
 import extension.toPlurals
 import extension.wrap
-import rss.RssReader
-import rss.formatter.RssFormatToken
-import rss.formatter.RssFormatter
-import rss.model.RssItem
 
 open class FeedsFlow(args: Array<String>) : App(args) {
     private val maximumTextLength = 4096
@@ -50,7 +48,11 @@ open class FeedsFlow(args: Array<String>) : App(args) {
                             var newItemCount = 0
                             when(feed.type) {
                                 Feed.Type.RSS.toString() -> {
-                                    val list = parseRssFeed(feed)
+                                    if (feed.format.isBlank()) {
+                                        feed.parseMode = Feed.ParseMode.HTML.toString()
+                                        feed.format = "<a href=\"${FormatToken.URL.value}\">${FormatToken.TITLE.value}</a>"
+                                    }
+                                    val list = RssReader.read(feed)
                                     newItemCount = list.size
                                     feedItems.addAll(list)
                                 }
@@ -82,18 +84,8 @@ open class FeedsFlow(args: Array<String>) : App(args) {
                 val disableWebPagePreview = if (chat.disableWebPagePreview) { true } else item.feed.disableWebPagePreview
                 val disableNotification = if (chat.disableNotification) { true } else item.feed.disableNotification
                 val protectContent = if (chat.protectContent) { true } else item.feed.protectContent
-                var parseMode = item.feed.parseMode
-                var format = item.feed.format
-                var text = ""
-                if (item is RssItem) {
-                    if (item.title.isBlank()) {
-                        format = "${RssFormatToken.ITEM_URL}"
-                    } else if (format.isBlank()) {
-                        format = "<a href=\"${RssFormatToken.ITEM_URL}\">${RssFormatToken.ITEM_TITLE}</a>"
-                        parseMode = Feed.ParseMode.HTML.toString()
-                    }
-                    text = RssFormatter.format(format, item)
-                }
+                val parseMode = item.feed.parseMode
+                val text = item.formattedText
                 if (text.isNotBlank()) {
                     val textList = text.wrap(maximumTextLength)
                     textList.forEach { wrappedText ->
@@ -117,28 +109,5 @@ open class FeedsFlow(args: Array<String>) : App(args) {
             }
         }
         return count > 0
-    }
-
-    private fun parseRssFeed(feed: Feed): List<RssItem> {
-        val rssFeedItemList = ArrayList<RssItem>()
-        val sentItemUrlSet = HashSet<String>()
-        feed.sentItems.forEach { sentItem ->
-            run {
-                sentItemUrlSet.add(sentItem.url)
-            }
-        }
-
-        val stream = RssReader.read(feed.url)
-        stream.sorted().forEach { rssItem ->
-            run {
-                rssItem?.let {
-                    if (rssItem.url.isNotBlank() && !sentItemUrlSet.contains(rssItem.url)) {
-                        it.feed = feed
-                        rssFeedItemList.add(it)
-                    }
-                }
-            }
-        }
-        return rssFeedItemList
     }
 }

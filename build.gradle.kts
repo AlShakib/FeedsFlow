@@ -23,6 +23,8 @@ dependencies {
 
     implementation("org.jsoup:jsoup:1.15.2")
 
+    implementation("com.rometools:rome:1.18.0")
+
     testImplementation(kotlin("test"))
 }
 
