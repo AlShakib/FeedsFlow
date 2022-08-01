@@ -1,0 +1,29 @@
+name: Feeds Flow Bot
+on:
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+jobs:
+  run_feeds_flow_bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Java 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+      - name: Download latest release
+        uses: robinraju/release-downloader@v1.4
+        with:
+          latest: true
+          tarBall: false
+          zipBall: false
+          fileName: "*.jar"
+      - name: Run latest release
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo "${FIREBASE_SERVICE_ACCOUNT}" > service_account.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$(realpath service_account.json)"
+          java -jar *.jar
