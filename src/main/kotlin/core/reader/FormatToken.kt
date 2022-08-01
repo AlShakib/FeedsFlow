@@ -13,6 +13,6 @@ enum class FormatToken(val value: String) {
     FEED_URL("{{FEED_URL}}");
 
     override fun toString(): String {
-        return value;
+        return value
     }
 }

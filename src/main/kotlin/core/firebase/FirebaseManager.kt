@@ -53,16 +53,14 @@ object FirebaseManager {
     fun saveChat(chat: Chat) {
         try {
             chat.feeds.forEach { feed ->
-                run {
-                    feed.sentItems.sorted()
-                    if (feed.sentItems.size > feed.cachedSentItemSize) {
-                        val newList = feed.sentItems.dropLast(feed.sentItems.size - feed.cachedSentItemSize)
-                        feed.sentItems.clear()
-                        feed.sentItems.addAll(newList)
-                    }
+                feed.sentItems.sort()
+                if (feed.sentItems.size > feed.cachedSentItemSize) {
+                    val newList = feed.sentItems.dropLast(feed.sentItems.size - feed.cachedSentItemSize)
+                    feed.sentItems.clear()
+                    feed.sentItems.addAll(newList.sorted())
                 }
             }
-            chat.feeds.sorted()
+            chat.feeds.sort()
             firestore.collection(COLLECTION_CHATS).document(chat.documentId).set(chat).get()
         } catch (exception: InterruptedException) {
             exception.printStackTrace()

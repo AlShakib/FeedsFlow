@@ -27,7 +27,7 @@ fun String.toURI(): URI {
 
 fun String.chomp(): String {
     if (isEmpty()) {
-        return this;
+        return this
     }
     if (length == 1) {
         val ch = this[0]

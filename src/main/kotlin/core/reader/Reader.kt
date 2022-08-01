@@ -1,6 +1,7 @@
 package core.reader
 
 import core.model.Feed
+import extension.chomp
 import extension.format
 import org.jsoup.Jsoup
 import java.util.*
@@ -18,9 +19,7 @@ abstract class Reader<ENTRY> {
         }
         val sentUrls = HashSet<String>()
         feed.sentItems.forEach { item ->
-            run {
-                sentUrls.add(item.url)
-            }
+            sentUrls.add(item.url)
         }
         val items = ArrayList<Feed.Item>()
         val cachedSentItemSize: Int = entryList.size * 3
@@ -28,35 +27,33 @@ abstract class Reader<ENTRY> {
             feed.cachedSentItemSize = cachedSentItemSize
         }
         entryList.forEach { entry ->
-            run {
-                val url = onUrl(feed, entry)
-                if (url.isNotBlank() && !sentUrls.contains(url)) {
-                    val id = onId(feed, entry)
-                    val title = onTitle(feed, entry)
-                    val authorName = onAuthorName(feed, entry)
-                    val authorEmail = onAuthorEmail(feed, entry)
-                    val authorUrl = onAuthorUrl(feed, entry)
-                    val contents = onContents(feed, entry)
-                    val publishedDate = onPublishedDate(feed, entry)
-                    val updatedDate = onUpdatedDate(feed, entry)
-                    var formattedText = url
-                    if (feed.format.isNotBlank()) {
-                        val pairList = ArrayList<Pair<String, String>>()
-                        pairList.add(Pair(FormatToken.URL.value, parseValue(url)))
-                        pairList.add(Pair(FormatToken.TITLE.value, parseValue(title)))
-                        pairList.add(Pair(FormatToken.AUTHOR_NAME.value, parseValue(authorName)))
-                        pairList.add(Pair(FormatToken.AUTHOR_EMAIL.value, parseValue(authorEmail)))
-                        pairList.add(Pair(FormatToken.AUTHOR_URL.value, parseValue(authorUrl)))
-                        pairList.add(Pair(FormatToken.CONTENTS.value, parseValue(contents)))
-                        pairList.add(Pair(FormatToken.PUBLISHED_DATE.value, parseValue(publishedDate)))
-                        pairList.add(Pair(FormatToken.UPDATED_DATE.value, parseValue(updatedDate)))
-                        pairList.add(Pair(FormatToken.FEED_TITLE.value, parseValue(feed.title)))
-                        pairList.add(Pair(FormatToken.FEED_URL.value, parseValue(feed.url)))
-                        formattedText = replaceEach(feed.format, pairList)
-                    }
-                    items.add(Feed.Item(parseDate = Date(), feed = feed, id = id, url = url,
-                        title = title ?: "<Unknown Title>", formattedText = formattedText, publishedDate = onPublishedDate(feed, entry)))
+            val url = onUrl(feed, entry)
+            if (url.isNotBlank() && !sentUrls.contains(url)) {
+                val id = onId(feed, entry)
+                val title = onTitle(feed, entry)
+                val authorName = onAuthorName(feed, entry)
+                val authorEmail = onAuthorEmail(feed, entry)
+                val authorUrl = onAuthorUrl(feed, entry)
+                val contents = onContents(feed, entry)
+                val publishedDate = onPublishedDate(feed, entry)
+                val updatedDate = onUpdatedDate(feed, entry)
+                var formattedText = url
+                if (feed.format.isNotBlank()) {
+                    val pairList = ArrayList<Pair<String, String>>()
+                    pairList.add(Pair(FormatToken.URL.value, parseValue(url)))
+                    pairList.add(Pair(FormatToken.TITLE.value, parseValue(title)))
+                    pairList.add(Pair(FormatToken.AUTHOR_NAME.value, parseValue(authorName)))
+                    pairList.add(Pair(FormatToken.AUTHOR_EMAIL.value, parseValue(authorEmail)))
+                    pairList.add(Pair(FormatToken.AUTHOR_URL.value, parseValue(authorUrl)))
+                    pairList.add(Pair(FormatToken.CONTENTS.value, parseValue(contents)))
+                    pairList.add(Pair(FormatToken.PUBLISHED_DATE.value, parseValue(publishedDate)))
+                    pairList.add(Pair(FormatToken.UPDATED_DATE.value, parseValue(updatedDate)))
+                    pairList.add(Pair(FormatToken.FEED_TITLE.value, parseValue(feed.title)))
+                    pairList.add(Pair(FormatToken.FEED_URL.value, parseValue(feed.url)))
+                    formattedText = replaceEach(feed.format, pairList).chomp()
                 }
+                items.add(Feed.Item(parseDate = Date(), feed = feed, id = id, url = url,
+                    title = title ?: "<Unknown Title>", formattedText = formattedText, publishedDate = onPublishedDate(feed, entry)))
             }
         }
         return items
