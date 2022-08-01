@@ -55,8 +55,8 @@ object FirebaseManager {
             chat.feeds.forEach { feed ->
                 run {
                     feed.sentItems.sorted()
-                    if (feed.sentItems.size > 150) {
-                        val newList = feed.sentItems.dropLast(feed.sentItems.size - 150)
+                    if (feed.sentItems.size > feed.cachedSentItemSize) {
+                        val newList = feed.sentItems.dropLast(feed.sentItems.size - feed.cachedSentItemSize)
                         feed.sentItems.clear()
                         feed.sentItems.addAll(newList)
                     }

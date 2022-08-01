@@ -16,11 +16,21 @@ abstract class Reader<ENTRY> {
         if (entryList.isEmpty()) {
             return emptyList()
         }
+        val sentUrls = HashSet<String>()
+        feed.sentItems.forEach { item ->
+            run {
+                sentUrls.add(item.url)
+            }
+        }
         val items = ArrayList<Feed.Item>()
+        val cachedSentItemSize: Int = entryList.size * 3
+        if (cachedSentItemSize > feed.cachedSentItemSize) {
+            feed.cachedSentItemSize = cachedSentItemSize
+        }
         entryList.forEach { entry ->
             run {
                 val url = onUrl(feed, entry)
-                if (url.isNotBlank()) {
+                if (url.isNotBlank() && !sentUrls.contains(url)) {
                     val id = onId(feed, entry)
                     val title = onTitle(feed, entry)
                     val authorName = onAuthorName(feed, entry)

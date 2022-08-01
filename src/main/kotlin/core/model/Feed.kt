@@ -5,7 +5,7 @@ import java.util.*
 data class Feed(var url: String = "", var title: String = "", var type: String = Type.NONE.toString(), var format: String = "",
                 var parseMode: String = ParseMode.NONE.toString(), var disableWebPagePreview: Boolean = false,
                 var disableNotification: Boolean = false, var protectContent: Boolean = false,
-                var active: Boolean = false, var sentItems: ArrayList<SentItem> = ArrayList()) : Comparable<Feed> {
+                var active: Boolean = false, var cachedSentItemSize: Int = 64, var sentItems: ArrayList<SentItem> = ArrayList()) : Comparable<Feed> {
 
     override fun compareTo(other: Feed): Int {
         return if (title.isEmpty() || other.title.isEmpty()) {

@@ -20,7 +20,7 @@ open class FeedsFlow(args: Array<String>) : App(args) {
         chats.forEach { chat ->
             run {
                 if (chat.active) {
-                    println("\n[PROCESSING] ${chat.title}")
+                    println("\n[START] ${chat.title}")
                     val feedItems = processChat(chat)
                     if (feedItems.isNotEmpty()) {
                         println("[SENDING] ${chat.title}")
