@@ -1,10 +1,10 @@
-name: Feeds Flow Bot
+name: Feeds Flow
 on:
   schedule:
     - cron: "*/20 * * * *"
   workflow_dispatch:
 jobs:
-  run_feeds_flow_bot:
+  run_feeds_flow:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Java 11
