@@ -29,31 +29,31 @@ abstract class Reader<ENTRY> {
         entryList.forEach { entry ->
             val url = onUrl(feed, entry)
             if (url.isNotBlank() && !sentUrls.contains(url)) {
-                val id = onId(feed, entry)
-                val title = onTitle(feed, entry)
-                val authorName = onAuthorName(feed, entry)
-                val authorEmail = onAuthorEmail(feed, entry)
-                val authorUrl = onAuthorUrl(feed, entry)
-                val contents = onContents(feed, entry)
-                val publishedDate = onPublishedDate(feed, entry)
-                val updatedDate = onUpdatedDate(feed, entry)
+                val id = parseValue(onId(feed, entry))
+                val title = parseValue(onTitle(feed, entry))
+                val authorName = parseValue(onAuthorName(feed, entry))
+                val authorEmail = parseValue(onAuthorEmail(feed, entry))
+                val authorUrl = parseValue(onAuthorUrl(feed, entry))
+                val contents = parseValue(onContents(feed, entry))
+                val publishedDate = parseValue(onPublishedDate(feed, entry))
+                val updatedDate = parseValue(onUpdatedDate(feed, entry))
                 var formattedText = url
                 if (feed.format.isNotBlank()) {
                     val pairList = ArrayList<Pair<String, String>>()
-                    pairList.add(Pair(FormatToken.URL.value, parseValue(url)))
-                    pairList.add(Pair(FormatToken.TITLE.value, parseValue(title)))
-                    pairList.add(Pair(FormatToken.AUTHOR_NAME.value, parseValue(authorName)))
-                    pairList.add(Pair(FormatToken.AUTHOR_EMAIL.value, parseValue(authorEmail)))
-                    pairList.add(Pair(FormatToken.AUTHOR_URL.value, parseValue(authorUrl)))
-                    pairList.add(Pair(FormatToken.CONTENTS.value, parseValue(contents)))
-                    pairList.add(Pair(FormatToken.PUBLISHED_DATE.value, parseValue(publishedDate)))
-                    pairList.add(Pair(FormatToken.UPDATED_DATE.value, parseValue(updatedDate)))
-                    pairList.add(Pair(FormatToken.FEED_TITLE.value, parseValue(feed.title)))
-                    pairList.add(Pair(FormatToken.FEED_URL.value, parseValue(feed.url)))
+                    pairList.add(Pair(FormatToken.URL.value, url))
+                    pairList.add(Pair(FormatToken.TITLE.value, title))
+                    pairList.add(Pair(FormatToken.AUTHOR_NAME.value, authorName))
+                    pairList.add(Pair(FormatToken.AUTHOR_EMAIL.value, authorEmail))
+                    pairList.add(Pair(FormatToken.AUTHOR_URL.value, authorUrl))
+                    pairList.add(Pair(FormatToken.CONTENTS.value, contents))
+                    pairList.add(Pair(FormatToken.PUBLISHED_DATE.value, publishedDate))
+                    pairList.add(Pair(FormatToken.UPDATED_DATE.value, updatedDate))
+                    pairList.add(Pair(FormatToken.FEED_TITLE.value, feed.title))
+                    pairList.add(Pair(FormatToken.FEED_URL.value, feed.url))
                     formattedText = replaceEach(feed.format, pairList).chomp()
                 }
                 items.add(Feed.Item(parseDate = Date(), feed = feed, id = id, url = url,
-                    title = title ?: "<Unknown Title>", formattedText = formattedText, publishedDate = onPublishedDate(feed, entry)))
+                    title = title, formattedText = formattedText, publishedDate = onPublishedDate(feed, entry)))
             }
         }
         return items
@@ -66,7 +66,7 @@ abstract class Reader<ENTRY> {
         if (value is Date) {
             return value.format()
         }
-        return Jsoup.parse(value.toString()).text()
+        return Jsoup.parse(value.toString()).text().trim()
     }
 
     private fun replaceEach(text: String, pairList: List<Pair<String, String>>): String {
