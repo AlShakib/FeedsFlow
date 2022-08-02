@@ -14,6 +14,7 @@ import extension.wrap
 
 open class FeedsFlow(args: Array<String>) : App(args) {
     private val maximumTextLength = 4096
+    private val maximumMessagesPerChat = 20
 
     override fun onStart() {
         val chats = FirebaseManager.getChatList()
@@ -75,6 +76,8 @@ open class FeedsFlow(args: Array<String>) : App(args) {
 
     private fun sendFeedItems(chat: Chat, items: List<Feed.Item>): Boolean {
         var count = 0
+        var sentItemCount = 0
+        var isSkippedStarted = false
         items.forEach { item ->
             val disableWebPagePreview = if (chat.disableWebPagePreview) { true } else item.feed.disableWebPagePreview
             val disableNotification = if (chat.disableNotification) { true } else item.feed.disableNotification
@@ -83,18 +86,32 @@ open class FeedsFlow(args: Array<String>) : App(args) {
             val text = item.formattedText
             if (text.isNotBlank()) {
                 val textList = text.wrap(maximumTextLength)
-                textList.forEach { wrappedText ->
-                    val sendMessage = SendMessage(chatId = chat.chatId, text = wrappedText, parseMode = parseMode,
-                        disableWebPagePreview = disableWebPagePreview, disableNotification = disableNotification,
-                        protectContent = protectContent)
-                    val response = TelegramBot.execute(sendMessage)
-                    if (response.ok) {
+                if (textList.size <= maximumMessagesPerChat) {
+                    sentItemCount += textList.size
+                    if (!isSkippedStarted && sentItemCount <= maximumMessagesPerChat) {
                         ++count
-                        item.feed.sentItems.add(SentItem(url = item.url, title =  item.title))
-                        println("    [${count.toString().padStart(2, '0')}] ${item.feed.title}: \"${item.title}\"")
+                        var isOk = false
+                        textList.forEach { wrappedText ->
+                            val sendMessage = SendMessage(chatId = chat.chatId, text = wrappedText, parseMode = parseMode,
+                                disableWebPagePreview = disableWebPagePreview, disableNotification = disableNotification,
+                                protectContent = protectContent)
+                            val response = TelegramBot.execute(sendMessage)
+                            if (response.ok) {
+                                isOk = true
+                                item.feed.sentItems.add(SentItem(url = item.url, title =  item.title))
+                            } else {
+                                println("    [x] ${response.errorCode} -> \"${response.description}\" -> \"${item.title}\"")
+                            }
+                        }
+                        if (isOk) {
+                            println("    [${count.toString().padStart(2, '0')}] ${item.feed.title}: \"${item.title}\"")
+                        }
                     } else {
-                        println("    [x] ${response.errorCode} -> \"${response.description}\"")
+                        isSkippedStarted = true
+                        println("    [x] Skipped -> \"${item.title}\"")
                     }
+                } else {
+                    println("    [x] ${item.feed.title}: Message too large! -> \"${item.title}\"")
                 }
             } else {
                 println("    [x] Nothing to send!")
