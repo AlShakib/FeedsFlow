@@ -91,8 +91,9 @@ open class FeedsFlow(args: Array<String>) : App(args) {
                     if (!isSkippedStarted && sentItemCount <= maximumMessagesPerChat) {
                         ++count
                         var isOk = false
+                        val validParseMode = if (textList.size <= 1) parseMode else ""
                         textList.forEach { wrappedText ->
-                            val sendMessage = SendMessage(chatId = chat.chatId, text = wrappedText, parseMode = parseMode,
+                            val sendMessage = SendMessage(chatId = chat.chatId, text = wrappedText, parseMode = validParseMode,
                                 disableWebPagePreview = disableWebPagePreview, disableNotification = disableNotification,
                                 protectContent = protectContent)
                             val response = TelegramBot.execute(sendMessage)
