@@ -99,12 +99,12 @@ open class FeedsFlow(args: Array<String>) : App(args) {
                             val response = TelegramBot.execute(sendMessage)
                             if (response.ok) {
                                 isOk = true
-                                item.feed.sentItems.add(SentItem(url = item.url, title =  item.title))
                             } else {
                                 println("    [x] ${response.errorCode} -> \"${response.description}\" -> \"${item.title}\"")
                             }
                         }
                         if (isOk) {
+                            item.feed.sentItems.add(SentItem(url = item.url, title =  item.title))
                             println("    [${count.toString().padStart(2, '0')}] ${item.feed.title}: \"${item.title}\"")
                         }
                     } else {
