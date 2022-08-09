@@ -90,17 +90,20 @@ open class FeedsFlow(args: Array<String>) : App(args) {
                     sentItemCount += textList.size
                     if (!isSkippedStarted && sentItemCount <= maximumMessagesPerChat) {
                         ++count
-                        var isOk = false
+                        var isOk = true
                         val validParseMode = if (textList.size <= 1) parseMode else Feed.ParseMode.NONE.toString()
                         textList.forEach { wrappedText ->
-                            val sendMessage = SendMessage(chatId = chat.chatId, text = wrappedText, parseMode = validParseMode,
-                                disableWebPagePreview = disableWebPagePreview, disableNotification = disableNotification,
-                                protectContent = protectContent)
-                            val response = TelegramBot.execute(sendMessage)
-                            if (response.ok) {
-                                isOk = true
-                            } else {
-                                println("    [x] ${response.errorCode} -> \"${response.description}\" -> \"${item.title}\"")
+                            if (isOk) {
+                                val sendMessage = SendMessage(
+                                    chatId = chat.chatId, text = wrappedText, parseMode = validParseMode,
+                                    disableWebPagePreview = disableWebPagePreview, disableNotification = disableNotification,
+                                    protectContent = protectContent
+                                )
+                                val response = TelegramBot.execute(sendMessage)
+                                isOk = response.ok
+                                if (!response.ok) {
+                                    println("    [x] ${response.errorCode} -> \"${response.description}\" -> \"${item.title}\"")
+                                }
                             }
                         }
                         if (isOk) {
