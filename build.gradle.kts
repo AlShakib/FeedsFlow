@@ -1,12 +1,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.7.10"
+    id("org.jetbrains.kotlin.jvm") version "1.7.10"
     application
 }
 
 group = "dev.alshakib.feeds"
-version = "0.3-alpha"
+version = "0.4-alpha"
 
 repositories {
     mavenCentral()
@@ -21,7 +21,7 @@ dependencies {
 
     implementation("com.squareup.moshi:moshi-kotlin:1.13.0")
 
-    implementation("org.jsoup:jsoup:1.15.2")
+    implementation("org.jsoup:jsoup:1.15.3")
 
     implementation("com.rometools:rome:1.18.0")
 
