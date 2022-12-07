@@ -2,11 +2,19 @@ package core.model
 
 import java.util.*
 
-data class Feed(var url: String = "", var title: String = "", var type: String = Type.NONE.toString(), var format: String = "",
-                var parseMode: String = ParseMode.NONE.toString(), var disableWebPagePreview: Boolean = false,
-                var disableNotification: Boolean = false, var protectContent: Boolean = false,
-                var active: Boolean = false, var cachedSentItemSize: Int = 100,
-                var sentItems: ArrayList<SentItem> = ArrayList()) : Comparable<Feed> {
+data class Feed(
+    var url: String = "",
+    var title: String = "",
+    var type: String = Type.NONE.toString(),
+    var format: String = "",
+    var parseMode: String = ParseMode.NONE.toString(),
+    var disableWebPagePreview: Boolean = false,
+    var disableNotification: Boolean = false,
+    var protectContent: Boolean = false,
+    var active: Boolean = false,
+    var cachedSentItemSize: Int = 100,
+    var sentItems: ArrayList<SentItem> = ArrayList()
+) : Comparable<Feed> {
 
     override fun compareTo(other: Feed): Int {
         return title.compareTo(other.title)
@@ -33,8 +41,10 @@ data class Feed(var url: String = "", var title: String = "", var type: String =
         }
     }
 
-    data class Item(val parseDate: Date, val feed: Feed, val id: String, val url: String, val title: String, val formattedText: String,
-                    val publishedDate: Date?) : Comparable<Item> {
+    data class Item(
+        val parseDate: Date, val feed: Feed, val id: String, val url: String, val title: String, val formattedText: String,
+        val publishedDate: Date?
+    ) : Comparable<Item> {
 
         override fun compareTo(other: Item): Int {
             if (publishedDate == null || other.publishedDate == null) {

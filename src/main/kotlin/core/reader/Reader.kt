@@ -6,9 +6,9 @@ import extension.format
 import org.jsoup.Jsoup
 import java.util.*
 
-abstract class Reader<ENTRY> {
+abstract class Reader<Entry> {
 
-    fun read(url: String): List<ENTRY> {
+    fun read(url: String): List<Entry> {
         return onEntryList(Feed(url))
     }
 
@@ -132,14 +132,14 @@ abstract class Reader<ENTRY> {
         return buf.toString()
     }
 
-    protected abstract fun onEntryList(feed: Feed): List<ENTRY>
-    protected abstract fun onId(feed: Feed, entry: ENTRY): String
-    protected abstract fun onUrl(feed: Feed, entry: ENTRY): String
-    protected abstract fun onTitle(feed: Feed, entry: ENTRY): String?
-    protected abstract fun onPublishedDate(feed: Feed, entry: ENTRY): Date?
-    protected abstract fun onUpdatedDate(feed: Feed, entry: ENTRY): Date?
-    protected abstract fun onContents(feed: Feed, entry: ENTRY): String?
-    protected abstract fun onAuthorName(feed: Feed, entry: ENTRY): String?
-    protected abstract fun onAuthorEmail(feed: Feed, entry: ENTRY): String?
-    protected abstract fun onAuthorUrl(feed: Feed, entry: ENTRY): String?
+    protected abstract fun onEntryList(feed: Feed): List<Entry>
+    protected abstract fun onId(feed: Feed, entry: Entry): String
+    protected abstract fun onUrl(feed: Feed, entry: Entry): String
+    protected abstract fun onTitle(feed: Feed, entry: Entry): String?
+    protected abstract fun onPublishedDate(feed: Feed, entry: Entry): Date?
+    protected abstract fun onUpdatedDate(feed: Feed, entry: Entry): Date?
+    protected abstract fun onContents(feed: Feed, entry: Entry): String?
+    protected abstract fun onAuthorName(feed: Feed, entry: Entry): String?
+    protected abstract fun onAuthorEmail(feed: Feed, entry: Entry): String?
+    protected abstract fun onAuthorUrl(feed: Feed, entry: Entry): String?
 }
