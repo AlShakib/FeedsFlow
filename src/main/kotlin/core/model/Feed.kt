@@ -5,9 +5,9 @@ import java.util.*
 data class Feed(
     var url: String = "",
     var title: String = "",
-    var type: String = Type.NONE.toString(),
+    var type: Type = Type.NONE,
     var format: String = "",
-    var parseMode: String = ParseMode.NONE.toString(),
+    var parseMode: ParseMode = ParseMode.NONE,
     var disableWebPagePreview: Boolean = false,
     var disableNotification: Boolean = false,
     var protectContent: Boolean = false,
@@ -20,25 +20,17 @@ data class Feed(
         return title.compareTo(other.title)
     }
 
-    enum class Type(private val value: String) {
-        NONE(""),
-        RSS("rss"),
-        YOUTUBE("facebook"),
-        FACEBOOK("youtube");
-
-        override fun toString(): String {
-            return value
-        }
+    enum class Type {
+        NONE,
+        RSS,
+        YOUTUBE,
+        FACEBOOK
     }
 
-    enum class ParseMode(private val value: String) {
-        NONE(""),
-        HTML("HTML"),
-        MARKDOWN("MarkdownV2");
-
-        override fun toString(): String {
-            return value
-        }
+    enum class ParseMode {
+        NONE,
+        HTML,
+        MARKDOWN2
     }
 
     data class Item(

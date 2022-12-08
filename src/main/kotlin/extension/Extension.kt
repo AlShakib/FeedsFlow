@@ -1,5 +1,6 @@
 package extension
 
+import core.model.Feed
 import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.*
@@ -8,6 +9,13 @@ import java.util.regex.Pattern
 
 private val simpleDateFormat = SimpleDateFormat("dd MMMM yyyy, hh:mm a", Locale.getDefault())
 private val patternToWrapOn = Pattern.compile(" ")
+
+private val telegramHtmlEscapeMap: Map<Char, String> = mapOf(
+    '<' to "&lt;",
+    '>' to "&gt;",
+    '&' to "&amp;",
+    '"' to "&quot;",
+)
 
 fun Date.format(): String {
     return simpleDateFormat.format(this)
@@ -91,4 +99,22 @@ fun String.wrap(length: Int): List<String> {
     }
     wrappedTextList.add(this.substring(offset))
     return wrappedTextList
+}
+
+fun String.escapeAs(mode: Feed.ParseMode): String {
+    if (mode == Feed.ParseMode.NONE) {
+        return this
+    }
+    return map { it.escapeAs(mode) }.joinToString("")
+}
+
+fun Char.escapeAs(mode: Feed.ParseMode): String {
+    if (mode == Feed.ParseMode.MARKDOWN2) {
+        if (this.code in 1..126) {
+            return "\\$this"
+        }
+    } else if (mode == Feed.ParseMode.HTML) {
+        return telegramHtmlEscapeMap.getOrDefault(this, this.toString())
+    }
+    return this.toString()
 }

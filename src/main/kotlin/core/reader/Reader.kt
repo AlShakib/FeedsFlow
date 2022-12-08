@@ -2,6 +2,7 @@ package core.reader
 
 import core.model.Feed
 import extension.chomp
+import extension.escapeAs
 import extension.format
 import org.jsoup.Jsoup
 import java.util.*
@@ -27,29 +28,29 @@ abstract class Reader<Entry> {
             feed.cachedSentItemSize = cachedSentItemSize
         }
         entryList.forEach { entry ->
-            val url = onUrl(feed, entry)
+            val url = parseValue(feed, onUrl(feed, entry))
             if (url.isNotBlank() && !sentUrls.contains(url)) {
-                val id = parseValue(onId(feed, entry))
-                val title = parseValue(onTitle(feed, entry))
-                val authorName = parseValue(onAuthorName(feed, entry))
-                val authorEmail = parseValue(onAuthorEmail(feed, entry))
-                val authorUrl = parseValue(onAuthorUrl(feed, entry))
-                val contents = parseValue(onContents(feed, entry))
-                val publishedDate = parseValue(onPublishedDate(feed, entry))
-                val updatedDate = parseValue(onUpdatedDate(feed, entry))
+                val id = parseValue(feed, onId(feed, entry))
+                val title = parseValue(feed, onTitle(feed, entry))
+                val authorName = parseValue(feed, onAuthorName(feed, entry))
+                val authorEmail = parseValue(feed, onAuthorEmail(feed, entry))
+                val authorUrl = parseValue(feed, onAuthorUrl(feed, entry))
+                val contents = parseValue(feed, onContents(feed, entry))
+                val publishedDate = parseValue(feed, onPublishedDate(feed, entry))
+                val updatedDate = parseValue(feed, onUpdatedDate(feed, entry))
                 var formattedText = url
                 if (feed.format.isNotBlank()) {
                     val pairList = ArrayList<Pair<String, String>>()
-                    pairList.add(Pair(FormatToken.URL.value, url))
-                    pairList.add(Pair(FormatToken.TITLE.value, title))
-                    pairList.add(Pair(FormatToken.AUTHOR_NAME.value, authorName))
-                    pairList.add(Pair(FormatToken.AUTHOR_EMAIL.value, authorEmail))
-                    pairList.add(Pair(FormatToken.AUTHOR_URL.value, authorUrl))
-                    pairList.add(Pair(FormatToken.CONTENTS.value, contents))
-                    pairList.add(Pair(FormatToken.PUBLISHED_DATE.value, publishedDate))
-                    pairList.add(Pair(FormatToken.UPDATED_DATE.value, updatedDate))
-                    pairList.add(Pair(FormatToken.FEED_TITLE.value, feed.title))
-                    pairList.add(Pair(FormatToken.FEED_URL.value, feed.url))
+                    pairList.add(Pair(FormatToken.URL.getToken(), url))
+                    pairList.add(Pair(FormatToken.TITLE.getToken(), title))
+                    pairList.add(Pair(FormatToken.AUTHOR_NAME.getToken(), authorName))
+                    pairList.add(Pair(FormatToken.AUTHOR_EMAIL.getToken(), authorEmail))
+                    pairList.add(Pair(FormatToken.AUTHOR_URL.getToken(), authorUrl))
+                    pairList.add(Pair(FormatToken.CONTENTS.getToken(), contents))
+                    pairList.add(Pair(FormatToken.PUBLISHED_DATE.getToken(), publishedDate))
+                    pairList.add(Pair(FormatToken.UPDATED_DATE.getToken(), updatedDate))
+                    pairList.add(Pair(FormatToken.FEED_TITLE.getToken(), feed.title))
+                    pairList.add(Pair(FormatToken.FEED_URL.getToken(), feed.url))
                     formattedText = replaceEach(feed.format, pairList).chomp()
                 }
                 items.add(Feed.Item(parseDate = Date(), feed = feed, id = id, url = url,
@@ -59,14 +60,14 @@ abstract class Reader<Entry> {
         return items
     }
 
-    private fun parseValue(value: Any?): String {
+    private fun parseValue(feed: Feed, value: Any?): String {
         if (value == null) {
             return ""
         }
         if (value is Date) {
-            return value.format()
+            return value.format().escapeAs(feed.parseMode)
         }
-        return Jsoup.parse(value.toString()).text().trim()
+        return Jsoup.parse(value.toString()).text().trim().escapeAs(feed.parseMode)
     }
 
     private fun replaceEach(text: String, pairList: List<Pair<String, String>>): String {

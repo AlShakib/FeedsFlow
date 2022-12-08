@@ -44,24 +44,24 @@ open class FeedsFlow(args: Array<String>) : App(args) {
                     try {
                         ++feedCount
                         var newItemCount = 0
-                        when(feed.type) {
-                            Feed.Type.RSS.toString() -> {
+                        when (feed.type) {
+                            Feed.Type.RSS -> {
                                 if (feed.format.isBlank()) {
-                                    feed.parseMode = Feed.ParseMode.HTML.toString()
-                                    feed.format = "<a href=\"${FormatToken.URL.value}\">${FormatToken.TITLE.value}</a>"
+                                    feed.parseMode = Feed.ParseMode.HTML
+                                    feed.format = "<a href=\"${FormatToken.URL.getToken()}\">${FormatToken.TITLE.getToken()}</a>"
                                 }
                                 val list = RssReader.read(feed)
                                 newItemCount = list.size
                                 feedItems.addAll(list)
                             }
-                            Feed.Type.FACEBOOK.toString() -> {}
-                            Feed.Type.YOUTUBE.toString() -> {}
+
+                            Feed.Type.FACEBOOK -> {}
+                            Feed.Type.YOUTUBE -> {}
                             else -> {}
                         }
                         println("    [${feedCount.toString().padStart(2, '0')}] ${feed.title}: $newItemCount new ${newItemCount.toPlurals("item", "items")} found")
                     } catch (exception: Exception) {
                         println("    [x] Can not parse feed: \"${feed.title}\": ${feed.url}")
-                        exception.printStackTrace()
                     }
                 } else {
                     println("    [x] No feed url found for \"${feed.title}\"")
@@ -91,7 +91,7 @@ open class FeedsFlow(args: Array<String>) : App(args) {
                     if (!isSkippedStarted && sentItemCount <= maximumMessagesPerChat) {
                         ++count
                         var isOk = true
-                        val validParseMode = if (textList.size <= 1) parseMode else Feed.ParseMode.NONE.toString()
+                        val validParseMode = if (textList.size <= 1) parseMode.toString() else Feed.ParseMode.NONE.toString()
                         textList.forEach { wrappedText ->
                             if (isOk) {
                                 val sendMessage = SendMessage(
