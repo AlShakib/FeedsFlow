@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     implementation("com.google.firebase:firebase-admin:9.1.1")
-    implementation("org.slf4j:slf4j-simple:1.7.36")
+    implementation("org.slf4j:slf4j-jdk14:2.0.0")
 
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.10.0"))
     implementation("com.squareup.okhttp3:okhttp")

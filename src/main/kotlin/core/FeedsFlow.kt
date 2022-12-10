@@ -24,9 +24,7 @@ open class FeedsFlow(args: Array<String>) : App(args) {
             release = System.getenv("RELEASE_MODE").toBoolean()
         } catch (_: Exception) {
         }
-        if (release) {
-            println("==> Feeds flow is running as release mode")
-        } else {
+        if (!release) {
             println("==> Feeds flow is running as test mode. Please set environment variable RELEASE_MODE=True to run as release mode.")
             try {
                 testChatId = System.getenv("TEST_CHAT_ID")
