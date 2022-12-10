@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "dev.alshakib.feeds"
-version = "0.5-beta"
+version = "0.6-beta"
 
 repositories {
     mavenCentral()
