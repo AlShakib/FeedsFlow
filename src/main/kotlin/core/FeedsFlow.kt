@@ -13,11 +13,32 @@ import extension.toPlurals
 import extension.wrap
 
 open class FeedsFlow(args: Array<String>) : App(args) {
+    private var isReleaseMode: Boolean = false
+    private var testChatId: String = ""
     private val maximumTextLength = 4096
     private val maximumMessagesPerChat = 20
 
+    init {
+        var release = false
+        try {
+            release = System.getenv("RELEASE_MODE").toBoolean()
+        } catch (_: Exception) {
+        }
+        if (release) {
+            println("==> Feeds flow is running as release mode")
+        } else {
+            println("==> Feeds flow is running as test mode. Please set environment variable RELEASE_MODE=True to run as release mode.")
+            try {
+                testChatId = System.getenv("TEST_CHAT_ID")
+            } catch (_: Exception) {
+            }
+        }
+        FirebaseManager.init(release)
+        isReleaseMode = release
+    }
+
     override fun onStart() {
-        val chats = FirebaseManager.getChatList()
+        val chats = FirebaseManager.getInstance().getChatList()
         chats.forEach { chat ->
             if (chat.active) {
                 println("\n[START] ${chat.title}")
@@ -25,7 +46,7 @@ open class FeedsFlow(args: Array<String>) : App(args) {
                 if (feedItems.isNotEmpty()) {
                     println("[SENDING] ${chat.title}")
                     if (sendFeedItems(chat, feedItems)) {
-                        FirebaseManager.saveChat(chat)
+                        FirebaseManager.getInstance().saveChat(chat)
                     }
                 }
                 println("[DONE] ${chat.title}")
@@ -59,7 +80,11 @@ open class FeedsFlow(args: Array<String>) : App(args) {
                             Feed.Type.YOUTUBE -> {}
                             else -> {}
                         }
-                        println("    [${feedCount.toString().padStart(2, '0')}] ${feed.title}: $newItemCount new ${newItemCount.toPlurals("item", "items")} found")
+                        println(
+                            "    [${
+                                feedCount.toString().padStart(2, '0')
+                            }] ${feed.title}: $newItemCount new ${newItemCount.toPlurals("item", "items")} found"
+                        )
                     } catch (exception: Exception) {
                         println("    [x] Can not parse feed: \"${feed.title}\": ${feed.url}")
                     }
@@ -75,13 +100,37 @@ open class FeedsFlow(args: Array<String>) : App(args) {
     }
 
     private fun sendFeedItems(chat: Chat, items: List<Feed.Item>): Boolean {
+        val chatId = if (isReleaseMode) {
+            val id = chat.chatId
+            if (id.isBlank()) {
+                println("[x] Can not send to \"${chat.title}\". No valid chat id is found.")
+                return false
+            }
+            id
+        } else {
+            val id = testChatId.ifBlank { chat.chatId }
+            if (id.isBlank()) {
+                println(
+                    "[x] Can not send to \"${chat.title}\". No valid chat id is found. " +
+                            "Please set environment variable TEST_CHAT_ID with a valid chat id."
+                )
+                return false
+            }
+            id
+        }
         var count = 0
         var sentItemCount = 0
         var isSkippedStarted = false
         items.forEach { item ->
-            val disableWebPagePreview = if (chat.disableWebPagePreview) { true } else item.feed.disableWebPagePreview
-            val disableNotification = if (chat.disableNotification) { true } else item.feed.disableNotification
-            val protectContent = if (chat.protectContent) { true } else item.feed.protectContent
+            val disableWebPagePreview = if (chat.disableWebPagePreview) {
+                true
+            } else item.feed.disableWebPagePreview
+            val disableNotification = if (chat.disableNotification) {
+                true
+            } else item.feed.disableNotification
+            val protectContent = if (chat.protectContent) {
+                true
+            } else item.feed.protectContent
             val parseMode = item.feed.parseMode
             val text = item.formattedText
             if (text.isNotBlank()) {
@@ -95,7 +144,7 @@ open class FeedsFlow(args: Array<String>) : App(args) {
                         textList.forEach { wrappedText ->
                             if (isOk) {
                                 val sendMessage = SendMessage(
-                                    chatId = chat.chatId, text = wrappedText, parseMode = validParseMode,
+                                    chatId = chatId, text = wrappedText, parseMode = validParseMode,
                                     disableWebPagePreview = disableWebPagePreview, disableNotification = disableNotification,
                                     protectContent = protectContent
                                 )
@@ -107,7 +156,7 @@ open class FeedsFlow(args: Array<String>) : App(args) {
                             }
                         }
                         if (isOk) {
-                            item.feed.sentItems.add(SentItem(url = item.url, title =  item.title))
+                            item.feed.sentItems.add(SentItem(url = item.url, title = item.title))
                             println("    [${count.toString().padStart(2, '0')}] ${item.feed.title}: \"${item.title}\"")
                         }
                     } else {

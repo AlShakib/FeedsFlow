@@ -9,8 +9,26 @@ import core.model.Chat
 import java.io.IOException
 import java.util.concurrent.ExecutionException
 
-object FirebaseManager {
-    private const val COLLECTION_CHATS = "feeds-flow"
+class FirebaseManager private constructor(private val releaseMode: Boolean) {
+    companion object {
+        private const val COLLECTION_CHATS = "feeds-flow"
+        private const val COLLECTION_CHATS_TEST = "feeds-flow-test"
+
+        private var instance: FirebaseManager? = null
+
+        fun init(release: Boolean = false) {
+            synchronized(FirebaseManager::class) {
+                val manager = FirebaseManager(release)
+                instance = manager
+                manager
+            }
+        }
+
+        fun getInstance(): FirebaseManager {
+            return instance ?: throw IllegalStateException("FirebaseManager is not initialized. Please call FirebaseManager.init() first.")
+        }
+    }
+
     private val firestore: Firestore
 
     init {
@@ -25,10 +43,14 @@ object FirebaseManager {
         firestore = FirestoreClient.getFirestore()
     }
 
+    private fun getCollection(): String {
+        return if (releaseMode) COLLECTION_CHATS else COLLECTION_CHATS_TEST
+    }
+
     fun getChatList(): List<Chat> {
         val chatList = ArrayList<Chat>()
         try {
-            val documents = firestore.collection(COLLECTION_CHATS).get().get().documents
+            val documents = firestore.collection(getCollection()).get().get().documents
             for (snapshot in documents) {
                 chatList.add(snapshot.toObject(Chat::class.java))
             }
@@ -40,7 +62,7 @@ object FirebaseManager {
 
     fun getChat(id: String): Chat? {
         try {
-            val snapshot = firestore.collection(COLLECTION_CHATS).document(id).get().get()
+            val snapshot = firestore.collection(getCollection()).document(id).get().get()
             if (snapshot != null) {
                 return snapshot.toObject(Chat::class.java)
             }
@@ -61,7 +83,7 @@ object FirebaseManager {
                 }
             }
             chat.feeds.sort()
-            firestore.collection(COLLECTION_CHATS).document(chat.documentId).set(chat).get()
+            firestore.collection(getCollection()).document(chat.documentId).set(chat).get()
         } catch (exception: InterruptedException) {
             exception.printStackTrace()
         } catch (exception: ExecutionException) {
