@@ -1,7 +1,7 @@
 name: Feeds Flow
 on:
-#  schedule:
-  #    - cron: "*/10 * * * *"
+  schedule:
+    - cron: "*/10 * * * *"
   workflow_dispatch:
 jobs:
   run_feeds_flow:
@@ -21,6 +21,7 @@ jobs:
           fileName: "*.jar"
       - name: Run latest release
         env:
+          RELEASE_MODE: ${{ secrets.RELEASE_MODE }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
