@@ -109,7 +109,7 @@ fun String.escapeAs(mode: Feed.ParseMode): String {
 }
 
 fun Char.escapeAs(mode: Feed.ParseMode): String {
-    if (mode == Feed.ParseMode.MARKDOWN2) {
+    if (mode == Feed.ParseMode.MARKDOWN) {
         if (this.code in 1..126) {
             return "\\$this"
         }

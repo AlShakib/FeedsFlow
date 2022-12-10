@@ -30,7 +30,7 @@ data class Feed(
     enum class ParseMode {
         NONE,
         HTML,
-        MARKDOWN2
+        MARKDOWN
     }
 
     data class Item(
