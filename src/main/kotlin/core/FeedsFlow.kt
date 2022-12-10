@@ -91,7 +91,7 @@ open class FeedsFlow(args: Array<String>) : App(args) {
                     if (!isSkippedStarted && sentItemCount <= maximumMessagesPerChat) {
                         ++count
                         var isOk = true
-                        val validParseMode = if (textList.size <= 1) parseMode.toString() else Feed.ParseMode.NONE.toString()
+                        val validParseMode = if (textList.size <= 1 && parseMode != Feed.ParseMode.NONE) parseMode.toString() else ""
                         textList.forEach { wrappedText ->
                             if (isOk) {
                                 val sendMessage = SendMessage(
