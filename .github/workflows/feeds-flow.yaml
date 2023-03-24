@@ -13,7 +13,7 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
       - name: Download latest release
-        uses: robinraju/release-downloader@v1.6
+        uses: robinraju/release-downloader@v1.7
         with:
           latest: true
           tarBall: false
